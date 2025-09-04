@@ -1,6 +1,6 @@
-
 import { GoogleGenAI, Modality, GenerateContentResponse } from "@google/genai";
 import { AiResult } from '../types';
+import { getApiKey } from '../config';
 
 const MODEL_NAME = 'gemini-2.5-flash-image-preview';
 
@@ -8,25 +8,13 @@ function getMimeTypeFromDataUrl(dataUrl: string): string {
     return dataUrl.substring(dataUrl.indexOf(":") + 1, dataUrl.indexOf(";"));
 }
 
-function base64ToUint8Array(base64: string): Uint8Array {
-  const binaryString = atob(base64);
-  const len = binaryString.length;
-  const bytes = new Uint8Array(len);
-  for (let i = 0; i < len; i++) {
-    bytes[i] = binaryString.charCodeAt(i);
-  }
-  return bytes;
-}
-
 export const editImageWithPrompt = async (
   base64ImageDataUrl: string,
   prompt: string
 ): Promise<AiResult> => {
-  if (!process.env.API_KEY) {
-    throw new Error("API_KEY environment variable is not set.");
-  }
+  const apiKey = getApiKey();
 
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const ai = new GoogleGenAI({ apiKey });
   const mimeType = getMimeTypeFromDataUrl(base64ImageDataUrl);
   const base64Data = base64ImageDataUrl.split(',')[1];
 
@@ -36,19 +24,17 @@ export const editImageWithPrompt = async (
   
   const response: GenerateContentResponse = await ai.models.generateContent({
     model: MODEL_NAME,
-    contents: {
-      parts: [
-        {
-          inlineData: {
-            data: base64Data,
-            mimeType: mimeType,
-          },
+    contents: [ // Changed from { parts: [...] } to a direct array of parts
+      {
+        inlineData: {
+          data: base64Data,
+          mimeType: mimeType,
         },
-        {
-          text: prompt,
-        },
-      ],
-    },
+      },
+      {
+        text: prompt,
+      },
+    ],
     config: {
         responseModalities: [Modality.IMAGE, Modality.TEXT],
     },
@@ -57,8 +43,9 @@ export const editImageWithPrompt = async (
   let resultImageUrl: string | null = null;
   let resultText: string | null = null;
   
-  if (response.candidates && response.candidates[0] && response.candidates[0].content && response.candidates[0].content.parts) {
-      for (const part of response.candidates[0].content.parts) {
+  const candidate = response.candidates?.[0];
+  if (candidate?.content?.parts) {
+      for (const part of candidate.content.parts) {
         if (part.text) {
           resultText = part.text;
         } else if (part.inlineData) {
@@ -69,7 +56,15 @@ export const editImageWithPrompt = async (
   }
 
   if (!resultImageUrl) {
-    throw new Error("API did not return an image. It might have refused the request.");
+    let errorMessage = "API did not return an image. It might have refused the request.";
+    if (resultText) {
+        errorMessage += ` The model responded: "${resultText}"`;
+    } else if (candidate?.finishReason && candidate.finishReason !== 'STOP') {
+        errorMessage += ` Generation stopped unexpectedly (reason: ${candidate.finishReason}).`;
+    } else if (response.promptFeedback?.blockReason) {
+        errorMessage += ` The prompt was blocked (reason: ${response.promptFeedback.blockReason}).`;
+    }
+    throw new Error(errorMessage);
   }
 
   return { imageUrl: resultImageUrl, text: resultText };

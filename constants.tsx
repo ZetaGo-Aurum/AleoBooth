@@ -14,7 +14,9 @@ import {
     FilmIcon,
     CpuIcon,
     MoonIcon,
-    PlusCircleIcon
+    PlusCircleIcon,
+    HistoryIcon,
+    ShieldIcon
 } from './components/icons/Icons';
 
 export const TEMPLATES: Template[] = [
@@ -89,6 +91,18 @@ export const TEMPLATES: Template[] = [
     name: 'Vintage',
     prompt: 'Make this image look like a vintage photograph from the 1950s. Apply a sepia tone, add a subtle film grain texture, and slightly fade the colors.',
     icon: <CameraIcon />,
+  },
+  {
+    id: '19th_century',
+    name: '19th Century',
+    prompt: "Transform this photo into a 19th-century portrait. Keep the person's facial features, but change their clothing to formal 19th-century attire. The image style should resemble an early photograph, like a daguerreotype or calotype, with a slightly sepia or monochrome tone and a formal, posed look.",
+    icon: <HistoryIcon />,
+  },
+  {
+    id: 'medieval',
+    name: 'Medieval',
+    prompt: "Reimagine the person in this photo as a character from the medieval era. Keep their facial features recognizable, but dress them in authentic medieval clothing (like a knight, noble, or artisan). Place them in a realistic medieval setting, such as a castle courtyard or a rustic village. The overall style should be reminiscent of a historical painting.",
+    icon: <ShieldIcon />,
   },
   {
     id: 'gothic_noir',
