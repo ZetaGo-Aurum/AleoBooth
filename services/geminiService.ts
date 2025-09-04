@@ -1,6 +1,5 @@
 import { GoogleGenAI, Modality, GenerateContentResponse } from "@google/genai";
 import { AiResult } from '../types';
-import { getApiKey } from '../config';
 
 const MODEL_NAME = 'gemini-2.5-flash-image-preview';
 
@@ -12,9 +11,7 @@ export const editImageWithPrompt = async (
   base64ImageDataUrl: string,
   prompt: string
 ): Promise<AiResult> => {
-  const apiKey = getApiKey();
-
-  const ai = new GoogleGenAI({ apiKey });
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   const mimeType = getMimeTypeFromDataUrl(base64ImageDataUrl);
   const base64Data = base64ImageDataUrl.split(',')[1];
 
