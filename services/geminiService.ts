@@ -21,17 +21,19 @@ export const editImageWithPrompt = async (
   
   const response: GenerateContentResponse = await ai.models.generateContent({
     model: MODEL_NAME,
-    contents: [ // Changed from { parts: [...] } to a direct array of parts
-      {
-        inlineData: {
-          data: base64Data,
-          mimeType: mimeType,
+    contents: {
+      parts: [
+        {
+          inlineData: {
+            data: base64Data,
+            mimeType: mimeType,
+          },
         },
-      },
-      {
-        text: prompt,
-      },
-    ],
+        {
+          text: prompt,
+        },
+      ],
+    },
     config: {
         responseModalities: [Modality.IMAGE, Modality.TEXT],
     },
