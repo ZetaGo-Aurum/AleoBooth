@@ -1,0 +1,7 @@
+{
+  "name": "Gemini AI Image Booth",
+  "description": "An AI-powered image editor that allows users to upload or capture photos and transform them using a variety of creative templates powered by Gemini.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
